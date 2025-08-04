@@ -1,14 +1,13 @@
 #include "pdnewlib.h"
-#include <cstring>
 #include <memory>
 #include <string>
+#include <string_view>
 
 extern "C" {
 #include "pd_api.h"
 }
 
-constexpr int TEXT_WIDTH = 16 * 2;
-constexpr int TEXT_HEIGHT = 16;
+constexpr std::string_view HELLO_TEXT = "Hello";
 
 /**
  * Game class - contains all game logic
@@ -17,16 +16,20 @@ class Game {
 public:
   explicit Game(PlaydateAPI *pd)
       : pd_(pd), fontpath_("/System/Fonts/Asheville-Sans-14-Bold.pft"),
-        font_(nullptr), x_((LCD_COLUMNS - TEXT_WIDTH) / 2),
-        y_((LCD_ROWS - TEXT_HEIGHT) / 2), dx_(2), dy_(1) {
-    // Load font
-    const char *err;
-    font_ = pd_->graphics->loadFont(fontpath_.c_str(), &err);
+        font_(load_font(pd, fontpath_)), dx_(2), dy_(1) {
 
-    if (font_ == nullptr) {
-      pd_->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__,
-                         fontpath_.c_str(), err);
+    // Calculate text dimensions and center position
+    if (!font_) {
+      pd_->system->error("Failed to load font from: %s", fontpath_.c_str());
     }
+
+    pd_->graphics->setFont(font_);
+    text_width_ = pd_->graphics->getTextWidth(
+        font_, HELLO_TEXT.data(), HELLO_TEXT.size(), kASCIIEncoding, 0);
+    text_height_ = pd_->graphics->getFontHeight(font_);
+
+    x_ = (LCD_COLUMNS - text_width_) / 2;
+    y_ = (LCD_ROWS - text_height_) / 2;
 
     // Set refresh rate
     pd_->display->setRefreshRate(50);
@@ -35,20 +38,30 @@ public:
   void update() {
     // Clear screen
     pd_->graphics->clear(kColorWhite);
+
+    // Draw bounding box as filled black rectangle
+    pd_->graphics->fillRect(x_, y_, text_width_, text_height_, kColorBlack);
+
+    // Draw text in white over the black box
     pd_->graphics->setFont(font_);
-    pd_->graphics->drawText("Hello", std::strlen("Hello"), kASCIIEncoding, x_,
-                            y_);
+    pd_->graphics->setDrawMode(kDrawModeInverted);
+    pd_->graphics->drawText(HELLO_TEXT.data(), HELLO_TEXT.size(),
+                            kASCIIEncoding, x_, y_);
+    pd_->graphics->setDrawMode(kDrawModeCopy);
 
     // Update position
     x_ += dx_;
     y_ += dy_;
 
-    // Bounce off edges
-    if (x_ < 0 || x_ > LCD_COLUMNS - TEXT_WIDTH) {
+    // Bounce off edges using structured bindings
+    auto [left_bound, right_bound] = std::pair{0, LCD_COLUMNS - text_width_};
+    auto [top_bound, bottom_bound] = std::pair{0, LCD_ROWS - text_height_};
+
+    if (x_ < left_bound || x_ > right_bound) {
       dx_ = -dx_;
     }
 
-    if (y_ < 0 || y_ > LCD_ROWS - TEXT_HEIGHT) {
+    if (y_ < top_bound || y_ > bottom_bound) {
       dy_ = -dy_;
     }
 
@@ -57,10 +70,16 @@ public:
   }
 
 private:
+  static LCDFont* load_font(PlaydateAPI* pd, std::string_view path) {
+    const char* err = nullptr;
+    return pd->graphics->loadFont(path.data(), &err);
+  }
+
   PlaydateAPI *pd_;
   std::string fontpath_;
-  LCDFont *font_;
+  LCDFont* font_;
   int x_, y_, dx_, dy_;
+  int text_width_, text_height_;
 };
 
 /**
@@ -71,9 +90,11 @@ std::unique_ptr<Game> game;
 /**
  * Update callback function - must be C-style for Playdate API
  */
-static int gameTick(void *userdata) {
-  (void)userdata; // unused parameter
-  game->update();
+static auto gameTick(void *userdata) -> int {
+  [[maybe_unused]] auto *pd = static_cast<PlaydateAPI *>(userdata);
+  if (game) {
+    game->update();
+  }
   return 1;
 }
 
@@ -82,21 +103,25 @@ static int gameTick(void *userdata) {
  * Must have C linkage for the Playdate runtime
  */
 extern "C" {
-int eventHandler(PlaydateAPI *pd, PDSystemEvent event, uint32_t arg) {
+auto eventHandler(PlaydateAPI *pd, PDSystemEvent event, uint32_t arg) -> int {
   // Essential: Call this first for C++ runtime initialization
   eventHandler_pdnewlib(pd, event, arg);
 
-  if (event == kEventInit) {
+  switch (event) {
+  case kEventInit:
     // Create our game instance
     game = std::make_unique<Game>(pd);
-
     // Set the update callback to turn off Lua mode
     pd->system->setUpdateCallback(gameTick, pd);
-  }
+    break;
 
-  if (event == kEventTerminate) {
+  case kEventTerminate:
     pd->system->logToConsole("Shutting down...");
-    game = nullptr; // Clean up
+    game.reset(); // Clean up using reset() instead of nullptr
+    break;
+
+  default:
+    break;
   }
 
   return 0;

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.19)
 get_filename_component(PLAYDATE_GAME_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 project(${PLAYDATE_GAME_NAME})
 
-# C++ 20 is required for Playdate headers
+# C++ 20 for device compatibility
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

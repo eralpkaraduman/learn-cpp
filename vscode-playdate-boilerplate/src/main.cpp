@@ -9,6 +9,7 @@ extern "C" {
 
 constexpr std::string_view HELLO_TEXT = "Hello";
 constexpr std::string_view IMAGE_PATH = "bisey";
+constexpr std::string_view BOUNCE_SOUND_PATH = "bounce-sound";
 
 /**
  * Game class - contains all game logic
@@ -17,7 +18,9 @@ class Game {
 public:
   explicit Game(PlaydateAPI *pd)
       : pd_(pd), fontpath_("/System/Fonts/Asheville-Sans-14-Bold.pft"),
-        font_(load_font(pd, fontpath_)), image_(load_image(pd, IMAGE_PATH)), dx_(2), dy_(1) {
+        font_(load_font(pd, fontpath_)), image_(load_image(pd, IMAGE_PATH)), 
+        bounce_sample_(load_sample(pd, BOUNCE_SOUND_PATH)), 
+        sample_player_(pd_->sound->sampleplayer->newPlayer()), dx_(2), dy_(1) {
 
     // Load font
     if (!font_) {
@@ -27,6 +30,13 @@ public:
     // Load image
     if (!image_) {
       pd_->system->error("Failed to load image from: %s", IMAGE_PATH.data());
+    }
+
+    // Load bounce sound
+    if (!bounce_sample_) {
+      pd_->system->logToConsole("Failed to load bounce sound from: %s", BOUNCE_SOUND_PATH.data());
+    } else if (sample_player_) {
+      pd_->sound->sampleplayer->setSample(sample_player_, bounce_sample_);
     }
 
     // Center the image (static position)
@@ -44,6 +54,7 @@ public:
     // Start text at top-left for bouncing
     text_x_ = 10;
     text_y_ = 10;
+
 
     // Set refresh rate
     pd_->display->setRefreshRate(50);
@@ -74,12 +85,15 @@ public:
     auto [left_bound, right_bound] = std::pair{0, LCD_COLUMNS - text_width_};
     auto [top_bound, bottom_bound] = std::pair{0, LCD_ROWS - text_height_};
 
+    // Play sound effect on collision and reverse direction
     if (text_x_ < left_bound || text_x_ > right_bound) {
       dx_ = -dx_;
+      play_bounce_sound();
     }
 
     if (text_y_ < top_bound || text_y_ > bottom_bound) {
       dy_ = -dy_;
+      play_bounce_sound();
     }
 
     // Draw FPS
@@ -96,11 +110,23 @@ private:
     const char* err = nullptr;
     return pd->graphics->loadBitmap(path.data(), &err);
   }
+  
+  static AudioSample* load_sample(PlaydateAPI* pd, std::string_view path) {
+    return pd->sound->sample->load(path.data());
+  }
+
+  void play_bounce_sound() {
+    if (sample_player_ && bounce_sample_) {
+      pd_->sound->sampleplayer->play(sample_player_, 1, 1.0f);
+    }
+  }
 
   PlaydateAPI *pd_;
   std::string fontpath_;
   LCDFont* font_;
   LCDBitmap* image_;
+  AudioSample* bounce_sample_;             // Bounce sound effect
+  SamplePlayer* sample_player_;            // Sound player
   int text_x_, text_y_, dx_, dy_;           // Text position and movement
   int image_x_, image_y_;                   // Image position (static)
   int text_width_, text_height_;           // Text dimensions

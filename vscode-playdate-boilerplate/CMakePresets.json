@@ -1,0 +1,35 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "simulator",
+            "displayName": "Playdate Simulator",
+            "description": "Build for Playdate Simulator (macOS)",
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "device",
+            "displayName": "Playdate Device",
+            "description": "Build for Playdate Device (ARM)",
+            "binaryDir": "build_device",
+            "toolchainFile": "$env{PLAYDATE_SDK_PATH}/C_API/buildsupport/arm.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "TOOLCHAIN": "armgcc"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "simulator",
+            "configurePreset": "simulator"
+        },
+        {
+            "name": "device",
+            "configurePreset": "device"
+        }
+    ]
+}

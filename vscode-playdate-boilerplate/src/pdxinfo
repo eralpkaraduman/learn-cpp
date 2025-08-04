@@ -1,0 +1,7 @@
+name=VSCode Playdate Boilerplate
+author=Your Name
+description=A C++ boilerplate project for Playdate
+bundleID=com.yourcompany.vscode-playdate-boilerplate
+version=1.0
+buildNumber=1
+imagePath=

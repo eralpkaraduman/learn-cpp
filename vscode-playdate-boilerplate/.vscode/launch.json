@@ -2,11 +2,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Playdate Simulator (Run)",
+            "name": "Playdate Simulator (Debug)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${env:PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator",
+            "args": ["${workspaceFolder}/build/${workspaceFolderBasename}.pdx"],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "CMake: build",
+            "stopOnEntry": false,
+            "sourceMap": {
+                "${workspaceFolder}/build": "${workspaceFolder}"
+            },
+            "initCommands": [
+                "breakpoint set -n __cxa_throw --auto-continue true",
+                "breakpoint set -n objc_exception_throw --auto-continue true"
+            ]
+        },
+        {
+            "name": "Playdate Simulator (Run Only)",
             "type": "node-terminal",
             "request": "launch",
-            "command": "${env:PLAYDATE_SDK_PATH}/bin/Playdate\\ Simulator.app/Contents/MacOS/Playdate\\ Simulator",
-            "args": ["${workspaceFolder}/${workspaceFolderBasename}.pdx"],
+            "command": "${env:PLAYDATE_SDK_PATH}/bin/Playdate\\ Simulator.app/Contents/MacOS/Playdate\\ Simulator ${workspaceFolder}/build/${workspaceFolderBasename}.pdx",
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: build"
         }

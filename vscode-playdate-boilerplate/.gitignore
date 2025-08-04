@@ -1,6 +1,6 @@
 # Build directories
 build/
-cmake-build-*/
+build_device/
 
 # VS Code settings (optional - remove if you want to share settings)
 .vscode/settings.json
@@ -16,3 +16,5 @@ cmake-build-*/
 # Object files
 *.o
 *.obj
+
+*.pdx

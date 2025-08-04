@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Bash(cmake:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(dsymutil:*)",
+      "WebFetch(domain:sdk.play.date)"
     ],
     "deny": []
   }

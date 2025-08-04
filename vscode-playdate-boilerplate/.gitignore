@@ -1,0 +1,18 @@
+# Build directories
+build/
+cmake-build-*/
+
+# VS Code settings (optional - remove if you want to share settings)
+.vscode/settings.json
+
+# macOS
+.DS_Store
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Object files
+*.o
+*.obj

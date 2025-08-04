@@ -1,0 +1,9 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

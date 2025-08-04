@@ -1,5 +1,10 @@
 # Quick Start
 
+## First Time Setup
+1. Install suggested vscode extensions when prompted
+2. Select compiler kit: ie: **Clang 16.0.0 arm64-apple-darwin** (first option)
+3. CMake will configure automatically
+
 ## VS Code
 - **Build**: Ctrl+Shift+P → "CMake: Build"
 - **Run**: Ctrl+Shift+P → "CMake: Run Without Debugging"  

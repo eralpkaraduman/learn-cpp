@@ -17,10 +17,10 @@ function(add_playdate_application PLAYDATE_GAME_NAME)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/Source
         )
         
-        # Copy pdxinfo to Source
+        # Copy all assets to Source directory
         add_custom_command(
             TARGET ${PLAYDATE_GAME_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/pdxinfo ${CMAKE_CURRENT_BINARY_DIR}/Source/pdxinfo
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/Source
         )
         
         # Copy and strip the ELF file to Source
@@ -47,10 +47,10 @@ function(add_playdate_application PLAYDATE_GAME_NAME)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/Source
         )
         
-        # Copy pdxinfo to Source
+        # Copy all assets to Source directory
         add_custom_command(
             TARGET ${PLAYDATE_GAME_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/src/pdxinfo ${CMAKE_CURRENT_BINARY_DIR}/Source/pdxinfo
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/Source
         )
 
         # Copy built library to Source

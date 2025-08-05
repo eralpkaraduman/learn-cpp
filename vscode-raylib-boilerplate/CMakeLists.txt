@@ -48,6 +48,14 @@ endif()
 # Executable
 add_executable(${PROJECT_NAME} src/main.cpp)
 
+# Add icon to app bundle
+if(APPLE)
+    set_source_files_properties(icon.icns PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
+    )
+    target_sources(${PROJECT_NAME} PRIVATE icon.icns)
+endif()
+
 # macOS App Bundle configuration
 if(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES

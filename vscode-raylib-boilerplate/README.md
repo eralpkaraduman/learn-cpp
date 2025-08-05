@@ -35,3 +35,8 @@ rm -rf build
 ```
 
 Requires: C++23 compiler, CMake, VS Code with recommended extensions.
+
+# Making macos icons
+- `brew install makeicns`
+- edit the icon.svg, export as png
+- `makeicns -in icon.png -out icon.icns`

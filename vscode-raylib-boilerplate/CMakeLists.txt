@@ -10,10 +10,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Compiler flags
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -s")
 
 # Export compile commands for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# macOS Release configuration (set before target creation)
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3")
+    
+    # Universal binary for Release builds
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+        message(STATUS "Building universal binary (arm64 + x86_64)")
+    endif()
+endif()
 
 # Raylib dependency - hybrid approach
 set(RAYLIB_VERSION 5.5)
@@ -45,3 +56,12 @@ target_link_libraries(${PROJECT_NAME}
     "-framework IOKit"
     "-framework Cocoa" 
     "-framework OpenGL")
+
+# Release build optimizations
+if(APPLE AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Strip symbols and dead code for smaller executable
+    target_link_options(${PROJECT_NAME} PRIVATE 
+        "-Wl,-dead_strip"
+        "-Wl,-x"
+    )
+endif()

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11) # Minimum for FetchContent
 
-# Use folder name as project name
-get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+# Project name
+set(PROJECT_NAME "RaylibApp")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 # C++23 standard
@@ -47,6 +47,14 @@ endif()
 
 # Executable
 add_executable(${PROJECT_NAME} src/main.cpp)
+
+# macOS App Bundle configuration
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist.in"
+    )
+endif()
 
 # Link raylib
 target_link_libraries(${PROJECT_NAME} raylib)

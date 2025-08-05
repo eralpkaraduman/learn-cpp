@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/RaylibApp.app/Contents/MacOS/RaylibApp",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,

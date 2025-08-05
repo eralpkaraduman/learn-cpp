@@ -1,30 +1,61 @@
-#include <print>
 #include "raylib.h"
+#include <print>
 
 int main() {
-    std::println("Starting raylib with C++23!");
+  std::println("Starting raylib with C++23!");
+
+  // Initialize window
+  const int screenWidth = 800;
+  const int screenHeight = 600;
+  InitWindow(screenWidth, screenHeight, "raylib + C++23 - Bouncing Ket");
+
+  SetTargetFPS(60);
+
+  // Load the ket image
+  Texture2D ketTexture = LoadTexture("assets/ket.png");
+  
+  // Start position (center)
+  float imageX = (screenWidth - ketTexture.width) / 2.0f;
+  float imageY = (screenHeight - ketTexture.height) / 2.0f;
+  
+  // Movement velocity
+  float dx = 3.0f;
+  float dy = 2.0f;
+
+  // Main game loop
+  while (!WindowShouldClose()) {
+    // Update
+    imageX += dx;
+    imageY += dy;
     
-    // Initialize window
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-    InitWindow(screenWidth, screenHeight, "raylib + C++23 - Basic Window");
-    
-    SetTargetFPS(60);
-    
-    // Main game loop
-    while (!WindowShouldClose()) {
-        // Update
-        
-        // Draw
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("Hello raylib with C++23!", 190, 200, 20, LIGHTGRAY);
-        EndDrawing();
+    // Bounce off edges
+    if (imageX <= 0 || imageX >= screenWidth - ketTexture.width) {
+      dx = -dx;
     }
+    if (imageY <= 0 || imageY >= screenHeight - ketTexture.height) {
+      dy = -dy;
+    }
+
+    // Draw
+    BeginDrawing();
+    ClearBackground(BLACK);
     
-    // Cleanup
-    CloseWindow();
+    // Draw the bouncing ket image
+    DrawTexture(ketTexture, (int)imageX, (int)imageY, WHITE);
     
-    std::println("raylib window closed!");
-    return 0;
+    // Draw text at top
+    DrawText("Bouncing Ket!", 
+             screenWidth/2 - MeasureText("Bouncing Ket!", 20)/2, 
+             20, 
+             20, WHITE);
+    
+    EndDrawing();
+  }
+
+  // Cleanup
+  UnloadTexture(ketTexture);
+  CloseWindow();
+
+  std::println("raylib window closed!");
+  return 0;
 }

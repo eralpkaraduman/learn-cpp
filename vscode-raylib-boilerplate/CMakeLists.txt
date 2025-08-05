@@ -56,13 +56,16 @@ if(APPLE)
     target_sources(${PROJECT_NAME} PRIVATE icon.icns)
 endif()
 
-# macOS App Bundle configuration
-if(APPLE)
+# macOS App Bundle configuration (only for Release builds)
+if(APPLE AND CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist.in"
     )
 endif()
+
+# Copy assets to build directory
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 # Link raylib
 target_link_libraries(${PROJECT_NAME} raylib)

@@ -2,6 +2,13 @@
 #include <print>
 #include <random>
 #include <vector>
+#include <string>
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#include <libgen.h>
+#include <unistd.h>
+#endif
 
 // Particle structure
 struct Particle {
@@ -15,6 +22,29 @@ struct Particle {
 int main() {
   std::println("Starting raylib with C++23!");
 
+  // Set working directory to Resources folder (always in app bundle on macOS)
+#ifdef __APPLE__
+  char execPath[1024];
+  uint32_t size = sizeof(execPath);
+  if (_NSGetExecutablePath(execPath, &size) == 0) {
+    std::string path(execPath);
+    std::println("Executable path: {}", path);
+    
+    std::string bundlePath = path.substr(0, path.find(".app/Contents/MacOS/") + 4);
+    std::string resourcesPath = bundlePath + "/Contents/Resources";
+    
+    std::println("Bundle path: {}", bundlePath);
+    std::println("Resources path: {}", resourcesPath);
+    
+    if (ChangeDirectory(resourcesPath.c_str())) {
+      std::println("Successfully changed working directory to: {}", resourcesPath);
+      std::println("Current working directory: {}", GetWorkingDirectory());
+    } else {
+      std::println("Failed to change working directory to: {}", resourcesPath);
+    }
+  }
+#endif
+
   // Initialize window and audio
   const int screenWidth = 800;
   const int screenHeight = 600;
@@ -23,10 +53,12 @@ int main() {
 
   SetTargetFPS(60);
 
-  // Load the ket image
+  // Load assets using simple relative paths - works everywhere now!
+  std::println("Attempting to load texture from: assets/ket.png");
   Texture2D ketTexture = LoadTexture("assets/ket.png");
-
-  // Load bounce sound
+  std::println("Texture loaded - ID: {}, Width: {}, Height: {}", ketTexture.id, ketTexture.width, ketTexture.height);
+  
+  std::println("Attempting to load sound from: assets/bounce.wav");
   Sound bounceSound = LoadSound("assets/bounce.wav");
   bool soundLoaded = (bounceSound.frameCount > 0);
 

@@ -64,7 +64,20 @@ public:
     // Clear screen
     pd_->graphics->clear(kColorWhite);
 
-    // Draw the cat image (static at center)
+    // Update cat position based on crank input
+    float crank_change = pd_->system->getCrankChange();
+    if (crank_change != 0.0f) {
+      // Move cat up/down based on crank rotation (positive = down, negative = up)
+      image_y_ += static_cast<int>(crank_change * 0.5f); // Scale down the movement
+      
+      // Keep cat within screen bounds
+      int img_width, img_height;
+      pd_->graphics->getBitmapData(image_, &img_width, &img_height, nullptr, nullptr, nullptr);
+      if (image_y_ < 0) image_y_ = 0;
+      if (image_y_ > LCD_ROWS - img_height) image_y_ = LCD_ROWS - img_height;
+    }
+
+    // Draw the cat image at updated position
     pd_->graphics->drawBitmap(image_, image_x_, image_y_, kBitmapUnflipped);
 
     // Draw bouncing text with black bounding box

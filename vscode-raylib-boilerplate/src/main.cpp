@@ -13,12 +13,12 @@ struct Particle {
 };
 
 int main() {
-  std::println("Starting raylib with C++23!");
+  TraceLog(LOG_INFO, "Starting raylib with C++23!");
 
   // Let raylib handle resource paths automatically
   const char *appDir = GetApplicationDirectory();
-  std::println("Application directory: {}", appDir);
-  std::println("Current working directory: {}", GetWorkingDirectory());
+  TraceLog(LOG_INFO, "Application directory: %s", appDir);
+  TraceLog(LOG_INFO, "Current working directory: %s", GetWorkingDirectory());
 
   // Initialize window and audio
   const int screenWidth = 800;
@@ -32,22 +32,22 @@ int main() {
   const char *texturePath = TextFormat("%s/assets/ket.png", GetApplicationDirectory());
   const char *soundPath = TextFormat("%s/assets/bounce.wav", GetApplicationDirectory());
   
-  std::println("Attempting to load texture from: {}", texturePath);
+  TraceLog(LOG_INFO, "Attempting to load texture from: %s", texturePath);
   Texture2D ketTexture = LoadTexture(texturePath);
-  std::println("Texture loaded - ID: {}, Width: {}, Height: {}", ketTexture.id,
+  TraceLog(LOG_INFO, "Texture loaded - ID: %u, Width: %d, Height: %d", ketTexture.id,
                ketTexture.width, ketTexture.height);
 
-  std::println("Attempting to load sound from: {}", soundPath);
+  TraceLog(LOG_INFO, "Attempting to load sound from: %s", soundPath);
   Sound bounceSound = LoadSound(soundPath);
   bool soundLoaded = (bounceSound.frameCount > 0);
 
-  std::println("Sound frameCount: {}", bounceSound.frameCount);
-  std::println("Sound loaded: {}", soundLoaded);
+  TraceLog(LOG_INFO, "Sound frameCount: %u", bounceSound.frameCount);
+  TraceLog(LOG_INFO, "Sound loaded: %s", soundLoaded ? "true" : "false");
 
   if (!soundLoaded) {
-    std::println("No bounce.wav found, sound effects disabled");
+    TraceLog(LOG_WARNING, "No bounce.wav found, sound effects disabled");
   } else {
-    std::println("Bounce sound loaded successfully!");
+    TraceLog(LOG_INFO, "Bounce sound loaded successfully!");
   }
 
   float imageX = 250;
@@ -99,7 +99,7 @@ int main() {
     if (imageX <= 0 || imageX >= screenWidth - ketTexture.width) {
       dx = -dx;
       if (soundLoaded) {
-        std::println("Playing bounce sound (horizontal)");
+        TraceLog(LOG_DEBUG, "Playing bounce sound (horizontal)");
         PlaySound(bounceSound);
       }
       // Create particle burst at collision point
@@ -114,7 +114,7 @@ int main() {
     if (imageY <= 0 || imageY >= screenHeight - ketTexture.height) {
       dy = -dy;
       if (soundLoaded) {
-        std::println("Playing bounce sound (vertical)");
+        TraceLog(LOG_DEBUG, "Playing bounce sound (vertical)");
         PlaySound(bounceSound);
       }
       // Create particle burst at collision point
@@ -215,6 +215,6 @@ int main() {
   CloseAudioDevice();
   CloseWindow();
 
-  std::println("raylib window closed!");
+  TraceLog(LOG_INFO, "raylib window closed!");
   return 0;
 }

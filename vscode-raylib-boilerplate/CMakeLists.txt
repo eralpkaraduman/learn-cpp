@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11) # Minimum for FetchContent
 
 # Project name
 set(PROJECT_NAME "RaylibApp")
-project(${PROJECT_NAME} LANGUAGES CXX)
+project(${PROJECT_NAME} LANGUAGES C CXX)
 
 # C++23 standard
 set(CMAKE_CXX_STANDARD 23)
@@ -46,7 +46,7 @@ if (NOT raylib_FOUND)
 endif()
 
 # Executable
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/partikel_wrapper.c)
 
 # Add icon to app bundle
 if(APPLE)

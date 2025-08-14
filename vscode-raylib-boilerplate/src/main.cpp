@@ -1,17 +1,7 @@
 #include "raylib.h"
-#include "reasings.h"
+#include "../vendor/reasings.h"
+#include "partikel_wrapper.h"
 #include <print>
-#include <random>
-#include <vector>
-
-// Particle structure
-struct Particle {
-  Vector2 position;
-  Vector2 velocity;
-  float life;
-  float maxLife;
-  Color color;
-};
 
 int main() {
   TraceLog(LOG_INFO, "Starting raylib with C++23!");
@@ -70,31 +60,8 @@ int main() {
   Rectangle imageSourceRect = {0, 0, (float)ketTexture.width,
                                (float)ketTexture.height};
 
-  // Particle system
-  std::vector<Particle> particles;
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<float> angleDist(0.0f, 360.0f);
-  std::uniform_real_distribution<float> speedDist(50.0f, 150.0f);
-  std::uniform_real_distribution<float> lifeDist(0.5f, 1.5f);
-
-  // Function to create particle burst
-  auto createParticleBurst = [&](Vector2 position, int count) {
-    for (int i = 0; i < count; i++) {
-      Particle particle;
-      particle.position = position;
-
-      float angle = angleDist(gen) * DEG2RAD;
-      float speed = speedDist(gen);
-      particle.velocity = {cos(angle) * speed, sin(angle) * speed};
-
-      particle.maxLife = lifeDist(gen);
-      particle.life = particle.maxLife;
-      particle.color = {255, 255, 255, 255}; // White particles
-
-      particles.push_back(particle);
-    }
-  };
+  // Simple particle system
+  SimpleParticleSystem particles;
 
   // Main game loop
   while (!WindowShouldClose()) {
@@ -112,7 +79,7 @@ int main() {
       // Create particle burst at collision point
       Vector2 burstPos = {imageRect.x <= 0 ? 0.0f : (float)screenWidth,
                           imageRect.y + imageRect.height / 2.0f};
-      createParticleBurst(burstPos, 15);
+      particles.burst(burstPos, 15);
 
       // Trigger bounce
       bounce = 1.0f;
@@ -126,7 +93,7 @@ int main() {
       // Create particle burst at collision point
       Vector2 burstPos = {imageRect.x + imageRect.width / 2.0f,
                           imageRect.y <= 0 ? 0.0f : (float)screenHeight};
-      createParticleBurst(burstPos, 15);
+      particles.burst(burstPos, 15);
 
       // Trigger bounce
       bounce = 1.0f;
@@ -142,26 +109,7 @@ int main() {
     }
 
     // Update particles
-    for (auto it = particles.begin(); it != particles.end();) {
-      it->life -= deltaTime;
-      if (it->life <= 0) {
-        it = particles.erase(it);
-      } else {
-        // Update position
-        it->position.x += it->velocity.x * deltaTime;
-        it->position.y += it->velocity.y * deltaTime;
-
-        // Fade out over time
-        float alpha = (it->life / it->maxLife) * 255.0f;
-        it->color.a = (unsigned char)alpha;
-
-        // Slow down particles
-        it->velocity.x *= 0.98f;
-        it->velocity.y *= 0.98f;
-
-        ++it;
-      }
-    }
+    particles.update(deltaTime);
 
     // Draw
     BeginDrawing();
@@ -176,6 +124,10 @@ int main() {
                           .height = imageRect.height};
     DrawTexturePro(ketTexture, imageSourceRect, destRect, imageCenterOffset,
                    rotation, WHITE);
+
+    // Draw particles
+    particles.draw();
+
     EndDrawing();
   }
 
@@ -184,6 +136,7 @@ int main() {
     UnloadSound(bounceSound);
   }
   UnloadTexture(ketTexture);
+  // Particle system cleanup is automatic
   CloseAudioDevice();
   CloseWindow();
 

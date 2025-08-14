@@ -30,13 +30,19 @@ int main() {
   SetTargetFPS(60);
 
   // Load assets relative to the binary location
-  const char *texturePath = TextFormat("%s/assets/ket.png", GetApplicationDirectory());
-  const char *soundPath = TextFormat("%s/assets/bounce.wav", GetApplicationDirectory());
-  
+  const char *texturePath =
+      TextFormat("%s/assets/ket.png", GetApplicationDirectory());
+  const char *soundPath =
+      TextFormat("%s/assets/bounce.wav", GetApplicationDirectory());
+
   TraceLog(LOG_INFO, "Attempting to load texture from: %s", texturePath);
   Texture2D ketTexture = LoadTexture(texturePath);
-  TraceLog(LOG_INFO, "Texture loaded - ID: %u, Width: %d, Height: %d", ketTexture.id,
-               ketTexture.width, ketTexture.height);
+  TraceLog(LOG_INFO, "Texture loaded - ID: %u, Width: %d, Height: %d",
+           ketTexture.id, ketTexture.width, ketTexture.height);
+
+  // Define fixed rectangle dimensions based on texture
+  float rectWidth = (float)ketTexture.width;
+  float rectHeight = (float)ketTexture.height;
 
   TraceLog(LOG_INFO, "Attempting to load sound from: %s", soundPath);
   Sound bounceSound = LoadSound(soundPath);
@@ -51,15 +57,18 @@ int main() {
     TraceLog(LOG_INFO, "Bounce sound loaded successfully!");
   }
 
-  float imageX = 250;
-  float imageY = 50;
-
   // Movement velocity
   float dx = 3.0f;
   float dy = 2.0f;
 
   // Bounce value (1.0f → 0.0f)
   float bounce = 0.0f;
+
+  Rectangle imageRect = {250.0f, 50.0f, rectWidth, rectHeight};
+  Vector2 imageCenterOffset = {(float)ketTexture.width / 2.0f,
+                               (float)ketTexture.height / 2.0f};
+  Rectangle imageSourceRect = {0, 0, (float)ketTexture.width,
+                               (float)ketTexture.height};
 
   // Particle system
   std::vector<Particle> particles;
@@ -89,34 +98,34 @@ int main() {
 
   // Main game loop
   while (!WindowShouldClose()) {
-    // Update
-    imageX += dx;
-    imageY += dy;
+    // Update collision rectangle position
+    imageRect.x += dx;
+    imageRect.y += dy;
 
     // Bounce off edges with sound and particles
-    if (imageX <= 0 || imageX >= screenWidth - ketTexture.width) {
+    if (imageRect.x <= 0 || imageRect.x >= screenWidth - imageRect.width) {
       dx = -dx;
       if (soundLoaded) {
         TraceLog(LOG_DEBUG, "Playing bounce sound (horizontal)");
         PlaySound(bounceSound);
       }
       // Create particle burst at collision point
-      Vector2 burstPos = {imageX <= 0 ? 0.0f : (float)screenWidth,
-                          imageY + ketTexture.height / 2.0f};
+      Vector2 burstPos = {imageRect.x <= 0 ? 0.0f : (float)screenWidth,
+                          imageRect.y + imageRect.height / 2.0f};
       createParticleBurst(burstPos, 15);
 
       // Trigger bounce
       bounce = 1.0f;
     }
-    if (imageY <= 0 || imageY >= screenHeight - ketTexture.height) {
+    if (imageRect.y <= 0 || imageRect.y >= screenHeight - imageRect.height) {
       dy = -dy;
       if (soundLoaded) {
         TraceLog(LOG_DEBUG, "Playing bounce sound (vertical)");
         PlaySound(bounceSound);
       }
       // Create particle burst at collision point
-      Vector2 burstPos = {imageX + ketTexture.width / 2.0f,
-                          imageY <= 0 ? 0.0f : (float)screenHeight};
+      Vector2 burstPos = {imageRect.x + imageRect.width / 2.0f,
+                          imageRect.y <= 0 ? 0.0f : (float)screenHeight};
       createParticleBurst(burstPos, 15);
 
       // Trigger bounce
@@ -126,8 +135,10 @@ int main() {
     // Update bounce (decay from 1.0f → 0.0f)
     float deltaTime = GetFrameTime();
     if (bounce > 0.0f) {
-      bounce -= deltaTime * 2.0f; // Decay rate
-      if (bounce < 0.0f) bounce = 0.0f;
+      bounce -= deltaTime * 1.2f; // Decay rate
+      if (bounce < 0.0f) {
+        bounce = 0.0f;
+      }
     }
 
     // Update particles
@@ -156,40 +167,15 @@ int main() {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    // Draw the bouncing ket image with bounce variance
-    Vector2 ketCenter = {imageX + ketTexture.width / 2.0f,
-                         imageY + ketTexture.height / 2.0f};
-    Rectangle sourceRec = {0, 0, (float)ketTexture.width,
-                           (float)ketTexture.height};
-    
-    // Interpolate bounce value into rotation and scale using easing
     float easedBounce = EaseElasticOut(1.0f - bounce, 0.0f, 1.0f, 1.0f);
-    float rotation = easedBounce * 15.0f;
-    float scale = 1.0f + easedBounce * 0.2f;
-    
-    Rectangle destRec = {ketCenter.x, ketCenter.y,
-                         ketTexture.width * scale,
-                         ketTexture.height * scale};
+    float rotation = (1 - easedBounce) * 15.0f; // Rotate based on bounce
 
-    DrawTexturePro(ketTexture, sourceRec, destRec,
-                   {destRec.width / 2.0f, destRec.height / 2.0f},
+    Rectangle destRect = {.x = imageRect.x + imageCenterOffset.x,
+                          .y = imageRect.y + imageCenterOffset.y,
+                          .width = imageRect.width,
+                          .height = imageRect.height};
+    DrawTexturePro(ketTexture, imageSourceRect, destRect, imageCenterOffset,
                    rotation, WHITE);
-
-    // Draw particles
-    for (const auto &particle : particles) {
-      DrawCircleV(particle.position, 2.0f, particle.color);
-    }
-
-    // Draw text at top
-    DrawText("Bouncing Ket with Particles!",
-             screenWidth / 2 -
-                 MeasureText("Bouncing Ket with Particles!", 20) / 2,
-             20, 20, WHITE);
-
-    // Draw particle count for debugging
-    DrawText(TextFormat("Particles: %d", (int)particles.size()), 10, 50, 16,
-             WHITE);
-
     EndDrawing();
   }
 

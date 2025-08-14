@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "reasings.h"
 #include <print>
 #include <random>
 #include <vector>
@@ -57,11 +58,8 @@ int main() {
   float dx = 3.0f;
   float dy = 2.0f;
 
-  // Wobble effect variables
-  float wobbleRotation = 0.0f;
-  float wobbleScale = 1.0f;
-  float wobbleTime = 0.0f;
-  bool isWobbling = false;
+  // Bounce value (1.0f → 0.0f)
+  float bounce = 0.0f;
 
   // Particle system
   std::vector<Particle> particles;
@@ -107,9 +105,8 @@ int main() {
                           imageY + ketTexture.height / 2.0f};
       createParticleBurst(burstPos, 15);
 
-      // Start wobble effect
-      isWobbling = true;
-      wobbleTime = 0.0f;
+      // Trigger bounce
+      bounce = 1.0f;
     }
     if (imageY <= 0 || imageY >= screenHeight - ketTexture.height) {
       dy = -dy;
@@ -122,32 +119,15 @@ int main() {
                           imageY <= 0 ? 0.0f : (float)screenHeight};
       createParticleBurst(burstPos, 15);
 
-      // Start wobble effect
-      isWobbling = true;
-      wobbleTime = 0.0f;
+      // Trigger bounce
+      bounce = 1.0f;
     }
 
-    // Update wobble effect
+    // Update bounce (decay from 1.0f → 0.0f)
     float deltaTime = GetFrameTime();
-    if (isWobbling) {
-      wobbleTime += deltaTime;
-      const float wobbleDuration = 0.3f; // 300ms wobble
-
-      if (wobbleTime < wobbleDuration) {
-        // Create wobble using sine waves
-        float progress = wobbleTime / wobbleDuration;
-        float intensity = (1.0f - progress); // Fade out over time
-
-        wobbleRotation =
-            sin(wobbleTime * 30.0f) * 15.0f * intensity; // Rotation wobble
-        wobbleScale =
-            1.0f + sin(wobbleTime * 25.0f) * 0.15f * intensity; // Scale wobble
-      } else {
-        // End wobble
-        isWobbling = false;
-        wobbleRotation = 0.0f;
-        wobbleScale = 1.0f;
-      }
+    if (bounce > 0.0f) {
+      bounce -= deltaTime * 2.0f; // Decay rate
+      if (bounce < 0.0f) bounce = 0.0f;
     }
 
     // Update particles
@@ -176,18 +156,24 @@ int main() {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    // Draw the bouncing ket image with wobble effect
+    // Draw the bouncing ket image with bounce variance
     Vector2 ketCenter = {imageX + ketTexture.width / 2.0f,
                          imageY + ketTexture.height / 2.0f};
     Rectangle sourceRec = {0, 0, (float)ketTexture.width,
                            (float)ketTexture.height};
+    
+    // Interpolate bounce value into rotation and scale using easing
+    float easedBounce = EaseElasticOut(1.0f - bounce, 0.0f, 1.0f, 1.0f);
+    float rotation = easedBounce * 15.0f;
+    float scale = 1.0f + easedBounce * 0.2f;
+    
     Rectangle destRec = {ketCenter.x, ketCenter.y,
-                         ketTexture.width * wobbleScale,
-                         ketTexture.height * wobbleScale};
+                         ketTexture.width * scale,
+                         ketTexture.height * scale};
 
     DrawTexturePro(ketTexture, sourceRec, destRec,
                    {destRec.width / 2.0f, destRec.height / 2.0f},
-                   wobbleRotation, WHITE);
+                   rotation, WHITE);
 
     // Draw particles
     for (const auto &particle : particles) {

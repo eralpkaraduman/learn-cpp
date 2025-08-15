@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🚀 Fast Launch (No Debug)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "open RaylibApp.app",
+            "cwd": "${workspaceFolder}/build",
+            "preLaunchTask": "CMake: build"
+        },
+        {
+            "name": "🐛 Debug Raylib App",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/RaylibApp.app/Contents/MacOS/RaylibApp",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "CMake: build"
+        }
+    ]
+}

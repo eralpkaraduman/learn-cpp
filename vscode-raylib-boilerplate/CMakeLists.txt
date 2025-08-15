@@ -32,6 +32,7 @@ find_package(raylib ${RAYLIB_VERSION} QUIET)
 
 # If raylib not found, fetch and build it
 if (NOT raylib_FOUND)
+    message(STATUS "Raylib ${RAYLIB_VERSION} not found locally, downloading and building from source...")
     include(FetchContent)
     FetchContent_Declare(
         raylib
@@ -40,9 +41,13 @@ if (NOT raylib_FOUND)
     )
     FetchContent_GetProperties(raylib)
     if (NOT raylib_POPULATED)
+        message(STATUS "Fetching raylib ${RAYLIB_VERSION} source code...")
         set(FETCHCONTENT_QUIET NO)
         FetchContent_MakeAvailable(raylib)
+        message(STATUS "Successfully built raylib ${RAYLIB_VERSION} from source")
     endif()
+else()
+    message(STATUS "Found raylib ${RAYLIB_VERSION} installed on system, using pre-installed version")
 endif()
 
 # Executable

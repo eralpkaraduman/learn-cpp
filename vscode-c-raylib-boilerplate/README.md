@@ -1,13 +1,5 @@
 # Raylib C Bouncing Ket Demo
 
-A bouncing ket demo with particle effects, sound, and wobble animations built with raylib and C.
-
-## Features
-- 🐱 Bouncing ket image with physics
-- ✨ Particle burst effects on collisions using [partikel.h](https://github.com/drakeerv/partikel)
-- 🔊 Sound effects (place `bounce.wav` in `assets/`)
-- 🎭 Wobble animation on impacts with elastic easing
-
 ## VS Code Setup
 1. Open project in VS Code
 2. Install suggested extensions when prompted

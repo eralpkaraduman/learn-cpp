@@ -79,7 +79,7 @@ int main() {
       // Create particle burst at collision point
       Vector2 burstPos = {imageRect.x <= 0 ? 0.0f : (float)screenWidth,
                           imageRect.y + imageRect.height / 2.0f};
-      particles.burst(burstPos, 15);
+      particles.burst(burstPos);
 
       // Trigger bounce
       bounce = 1.0f;
@@ -93,7 +93,7 @@ int main() {
       // Create particle burst at collision point
       Vector2 burstPos = {imageRect.x + imageRect.width / 2.0f,
                           imageRect.y <= 0 ? 0.0f : (float)screenHeight};
-      particles.burst(burstPos, 15);
+      particles.burst(burstPos);
 
       // Trigger bounce
       bounce = 1.0f;

@@ -28,7 +28,7 @@ public:
         free_emitter(emitter);
     }
     
-    void burst(Vector2 position, int /* count */ = 15) {
+    void burst(Vector2 position) {
         set_emitter_origin(emitter, position);
         burst_particles(emitter);
     }
